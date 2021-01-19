@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TinyCache.Tests
+namespace TinyCache.Extensions
 {
     public static class MemoryCacheExtension
     {
-        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Func<T> factory) where T: class
+        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Func<T> factory) where T : class
         {
-            if(cache.TryGetValue(key, out var value))
+            if (cache.TryGetValue(key, out var value))
             {
                 return value;
             }
