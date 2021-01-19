@@ -57,6 +57,7 @@ namespace TinyCache
             {
                 if (!entry.CheckExpired(utcNow))
                 {
+                    entry.LastAccessed = utcNow;
                     value = entry.Value;
                     return true;
                 }

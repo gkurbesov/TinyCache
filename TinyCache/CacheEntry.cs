@@ -23,6 +23,11 @@ namespace TinyCache
         /// </summary>
         public DateTimeOffset? AbsoluteExpiration { get; set; }
         /// <summary>
+        ///  Gets or sets how long a cache entry can be inactive (e.g. not accessed) before it will be removed.
+        ///  This will not extend the entry lifetime beyond the absolute expiration (if set).
+        /// </summary>
+        public TimeSpan? SlidingExpiration { get; set; }
+        /// <summary>
         /// The value for the cache entry.
         /// </summary>
         public T Value { get; set; }
@@ -30,6 +35,7 @@ namespace TinyCache
         /// Expired flag
         /// </summary>
         public bool Expired { get; internal set; } = false;
+        internal DateTimeOffset LastAccessed { get; set; }
 
         public bool CheckExpired(in DateTimeOffset now)
         {
@@ -40,11 +46,14 @@ namespace TinyCache
 
             bool FullCheck(in DateTimeOffset offset)
             {
-                if (Expired)
+                if (Expired) return true;
+                
+                if (AbsoluteExpiration.HasValue && AbsoluteExpiration.Value <= offset)
                 {
+                    Expired = true;
                     return true;
                 }
-                else if (AbsoluteExpiration.HasValue && AbsoluteExpiration.Value <= offset)
+                if (SlidingExpiration.HasValue && (offset - LastAccessed) >= SlidingExpiration)
                 {
                     Expired = true;
                     return true;
