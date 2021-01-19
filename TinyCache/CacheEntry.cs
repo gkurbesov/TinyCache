@@ -39,7 +39,7 @@ namespace TinyCache
 
         public bool CheckExpired(in DateTimeOffset now)
         {
-            if (!Expired && !AbsoluteExpiration.HasValue)
+            if (!Expired && !AbsoluteExpiration.HasValue && !SlidingExpiration.HasValue)
                 return false;
 
             return FullCheck(now);

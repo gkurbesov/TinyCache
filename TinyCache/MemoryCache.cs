@@ -28,6 +28,7 @@ namespace TinyCache
                 throw new ArgumentNullException(nameof(key));
 
             var entry = new CacheEntry<T>(key);
+            entry.LastAccessed = options.Clock.UtcNow;
             return entries.AddOrUpdate(key, entry, (k, old) => entry);
         }
 

@@ -9,7 +9,7 @@ namespace TinyCache.Tests
     public class MemoryCacheTest
     {
         [Fact]
-        public void CreateEntryTest1()
+        public void CreateEntryTest()
         {
             IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
 
@@ -19,14 +19,12 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public void CreateEntryTest2()
+        public void TryGetValueTest1()
         {
             IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
-
             var tmp = new object();
-
             entry.Value = tmp;
 
             var result = cache.TryGetValue(1, out var value);
@@ -37,16 +35,13 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public void CreateEntryTest3()
+        public void TryGetValueTest2()
         {
             IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
-
             entry.Value = new object();
-
             cache.CreateEntry(1);
-
             var result = cache.TryGetValue(1, out var value);
 
             Assert.True(result);
@@ -60,9 +55,9 @@ namespace TinyCache.Tests
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
-
             cache.CreateEntry(1);
             cache.Remove(1);
+
             var result = cache.TryGetValue(1, out var value);
 
             Assert.False(result);
@@ -72,7 +67,7 @@ namespace TinyCache.Tests
         [Fact]
         public void ExpiredTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1)});
+            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
@@ -85,11 +80,33 @@ namespace TinyCache.Tests
         [Fact]
         public void ExpiredTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
+            IMemoryCache<object> cache = new MemoryCache<object>(
+                new MemoryCacheOptions()
+                {
+                    ExpirationScanFrequency = TimeSpan.FromSeconds(1)
+                });
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
             entry.AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(2);
+
+            Assert.True(cache.TryGetValue(1, out var tmp1));
+            Thread.Sleep(3500);
+            Assert.False(cache.TryGetValue(1, out var tmp2));
+        }
+
+        [Fact]
+        public void ExpiredTest3()
+        {
+            IMemoryCache<object> cache = new MemoryCache<object>(
+                new MemoryCacheOptions()
+                {
+                    ExpirationScanFrequency = TimeSpan.FromSeconds(30)
+                });
+
+            var entry = cache.CreateEntry(1);
+            entry.Value = new object();
+            entry.SlidingExpiration = TimeSpan.FromSeconds(1);
 
             Assert.True(cache.TryGetValue(1, out var tmp1));
             Thread.Sleep(3500);

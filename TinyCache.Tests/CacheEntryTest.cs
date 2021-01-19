@@ -18,17 +18,6 @@ namespace TinyCache.Tests
         {
             CacheEntry<object> entry = new CacheEntry<object>(1)
             {
-                Expired = true
-            };
-
-            Assert.True(entry.CheckExpired(DateTimeOffset.UtcNow));
-        }
-
-        [Fact]
-        public void Test3()
-        {
-            CacheEntry<object> entry = new CacheEntry<object>(1)
-            {
                 AbsoluteExpiration = DateTime.UtcNow.AddMinutes(-1)
             };
 
