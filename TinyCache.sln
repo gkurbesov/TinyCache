@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyCache", "TinyCache\Tiny
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyCache.Tests", "TinyCache.Tests\TinyCache.Tests.csproj", "{BFFEFDC6-66F0-41DC-8B25-37E892D168B1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyCache.Extensions", "TinyCache.Extensions\TinyCache.Extensions.csproj", "{1B98F0B3-87BC-47B7-9007-A7DB3F601A6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BFFEFDC6-66F0-41DC-8B25-37E892D168B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BFFEFDC6-66F0-41DC-8B25-37E892D168B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BFFEFDC6-66F0-41DC-8B25-37E892D168B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B98F0B3-87BC-47B7-9007-A7DB3F601A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B98F0B3-87BC-47B7-9007-A7DB3F601A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B98F0B3-87BC-47B7-9007-A7DB3F601A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B98F0B3-87BC-47B7-9007-A7DB3F601A6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
