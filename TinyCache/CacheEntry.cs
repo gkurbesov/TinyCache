@@ -10,13 +10,26 @@ namespace TinyCache
         {
             Key = key ?? throw new ArgumentNullException(nameof(key));
         }
-
+        /// <summary>
+        /// Key of cache item
+        /// </summary>
         public object Key { get; private set; }
+        /// <summary>
+        /// The priority of keeping a cache entry during cleanup
+        /// </summary>
         public CacheItemPriority Priority { get; set; } = CacheItemPriority.Normal;
+        /// <summary>
+        /// The absolute expiration date for the cache entry.
+        /// </summary>
         public DateTimeOffset? AbsoluteExpiration { get; set; }
+        /// <summary>
+        /// The value for the cache entry.
+        /// </summary>
         public T Value { get; set; }
-        public bool Expired { get; set; } = false;
-
+        /// <summary>
+        /// Expired flag
+        /// </summary>
+        public bool Expired { get; internal set; } = false;
 
         public bool CheckExpired(in DateTimeOffset now)
         {
