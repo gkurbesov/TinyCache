@@ -18,6 +18,7 @@ namespace TinyCache
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
             this.options = options;
+            this.entries = new ConcurrentDictionary<object, CacheEntry<T>>();
         }
 
         public ICacheEntry<T> CreateEntry(object key)
@@ -55,16 +56,21 @@ namespace TinyCache
             if (entries.TryGetValue(key, out var entry))
             {
                 if (!entry.CheckExpired(utcNow))
+                {
                     value = entry.Value;
+                    return true;
+                }
                 else
+                {
                     Remove(key);
+                }
             }
-
             ScanForExpiredItems(utcNow);
-            return value != null;
+            value = null;
+            return false;
         }
 
-        private void ScanForExpiredItems(DateTimeOffset utcNow)
+        internal void ScanForExpiredItems(DateTimeOffset utcNow)
         {
             if (options.ExpirationScanFrequency < utcNow - lastExpirationScan)
             {
@@ -80,7 +86,7 @@ namespace TinyCache
             }
         }
 
-        private void CheckDisposed()
+        internal void CheckDisposed()
         {
             if (_disposed)
             {

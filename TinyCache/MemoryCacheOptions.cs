@@ -12,11 +12,11 @@ namespace TinyCache
         /// </summary>
         public TimeSpan ExpirationScanFrequency { get; set; } = TimeSpan.FromMinutes(1);
 
-        private long? _sizeLimit;
+        private int? _sizeLimit;
         /// <summary>
         /// Gets or sets the maximum size of the cache.
         /// </summary>
-        public long? SizeLimit
+        public int? SizeLimit
         {
             get => _sizeLimit;
             set
