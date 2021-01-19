@@ -20,7 +20,7 @@ namespace TinyCache
 
         private int? sizeLimit;
         /// <summary>
-        /// Gets or sets the maximum size of the cache.
+        /// Gets or sets the maximum size of the cache items.
         /// </summary>
         public int? SizeLimit
         {
