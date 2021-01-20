@@ -27,5 +27,11 @@ namespace TinyCache
         /// Gets or sets the value for the cache entry.
         /// </summary>
         T Value { get; set; }
+        /// <summary>
+        /// Expired flag
+        /// </summary>
+        bool Expired { get; set; }
+        DateTimeOffset LastAccessed { get; set; }
+        bool CheckExpired(in DateTimeOffset now);
     }
 }

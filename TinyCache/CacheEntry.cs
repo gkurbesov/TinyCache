@@ -34,8 +34,8 @@ namespace TinyCache
         /// <summary>
         /// Expired flag
         /// </summary>
-        public bool Expired { get; internal set; } = false;
-        internal DateTimeOffset LastAccessed { get; set; }
+        public bool Expired { get; set; } = false;
+        public DateTimeOffset LastAccessed { get; set; }
 
         public bool CheckExpired(in DateTimeOffset now)
         {
