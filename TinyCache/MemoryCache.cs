@@ -9,7 +9,7 @@ namespace TinyCache
     public class MemoryCache<T> : IMemoryCache<T>, IDisposable where T : class
     {
         private readonly MemoryCacheOptions options;
-        private readonly ConcurrentDictionary<object, CacheEntry<T>> entries;
+        private readonly ConcurrentDictionary<object, ICacheEntry<T>> entries;
         private DateTimeOffset lastExpirationScan;
         private bool _disposed;
 
@@ -18,9 +18,10 @@ namespace TinyCache
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
             this.options = options;
-            this.entries = new ConcurrentDictionary<object, CacheEntry<T>>();
+            this.entries = new ConcurrentDictionary<object, ICacheEntry<T>>();
         }
 
+        #region Create or set
         public ICacheEntry<T> CreateEntry(object key)
         {
             CheckDisposed();
@@ -32,17 +33,35 @@ namespace TinyCache
             return entries.AddOrUpdate(key, entry, (k, old) => entry);
         }
 
-        public void Remove(object key)
+        public bool TrySet(object key, ICacheEntry<T> entry)
+        {
+            CheckDisposed();
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+            if (entry == null)
+                throw new ArgumentNullException(nameof(entry));
+            if (entry.Key == null)
+                throw new ArgumentNullException(nameof(entry.Key), "Key in entry cannot be null");
+            if (!key.Equals(entry.Key))
+                throw new ArgumentException("The key argument and key in the entity must match", nameof(key));
+
+            if (!entries.ContainsKey(key))
+                return entries.TryAdd(key, entry);
+            else
+                return false;
+
+        }
+        #endregion
+
+        #region Get
+
+        public bool ContainsKey(object key)
         {
             CheckDisposed();
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (entries.TryRemove(key, out CacheEntry<T> entry))
-            {
-                entry.Expired = true;
-            }
-            ScanForExpiredItems(options.Clock.UtcNow);
+            return entries.ContainsKey(key);
         }
 
         public bool TryGetValue(object key, out T value)
@@ -51,7 +70,6 @@ namespace TinyCache
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            value = null;
             var utcNow = options.Clock.UtcNow;
 
             if (entries.TryGetValue(key, out var entry))
@@ -67,12 +85,58 @@ namespace TinyCache
                     Remove(key);
                 }
             }
+
             ScanForExpiredItems(utcNow);
+
             value = null;
             return false;
         }
 
-        internal void ScanForExpiredItems(DateTimeOffset utcNow)
+        public bool TryGetEntry(object key, ICacheEntry<T> entry)
+        {
+            CheckDisposed();
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            var utcNow = options.Clock.UtcNow;
+
+            if (entries.TryGetValue(key, out var cahceEntry))
+            {
+                if (!entry.CheckExpired(utcNow))
+                {
+                    cahceEntry.LastAccessed = utcNow;
+                    entry = cahceEntry;
+                    return true;
+                }
+                else
+                {
+                    Remove(key);
+                }
+            }
+
+            ScanForExpiredItems(utcNow);
+
+            entry = null;
+            return false;
+        }
+
+        #endregion
+
+        #region Remove
+
+        public void Remove(object key)
+        {
+            CheckDisposed();
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+
+            if (entries.TryRemove(key, out ICacheEntry<T> entry))
+                entry.Expired = true;
+
+            ScanForExpiredItems(options.Clock.UtcNow);
+        }
+
+        protected void ScanForExpiredItems(DateTimeOffset utcNow)
         {
             if (options.ExpirationScanFrequency < utcNow - lastExpirationScan)
             {
@@ -87,6 +151,8 @@ namespace TinyCache
                 });
             }
         }
+
+        #endregion
 
         internal void CheckDisposed()
         {
