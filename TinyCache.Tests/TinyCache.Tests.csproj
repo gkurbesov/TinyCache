@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TinyCache.Extensions\TinyCache.Extensions.csproj" />
     <ProjectReference Include="..\TinyCache\TinyCache.csproj" />
   </ItemGroup>
 
