@@ -46,19 +46,11 @@ namespace TinyCache
 
             bool FullCheck(in DateTimeOffset offset)
             {
-                if (Expired) return true;
-                
                 if (AbsoluteExpiration.HasValue && AbsoluteExpiration.Value <= offset)
-                {
                     Expired = true;
-                    return true;
-                }
                 if (SlidingExpiration.HasValue && (offset - LastAccessed) >= SlidingExpiration)
-                {
                     Expired = true;
-                    return true;
-                }
-                return false;
+                return Expired;
             }
         }
     }

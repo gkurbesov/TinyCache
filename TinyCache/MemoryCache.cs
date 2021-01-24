@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,9 +29,16 @@ namespace TinyCache
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            var entry = new CacheEntry<T>(key);
-            entry.LastAccessed = options.Clock.UtcNow;
-            return entries.AddOrUpdate(key, entry, (k, old) => entry);
+            if(ScanForRemoveWithItemPriority())
+            {
+                var entry = new CacheEntry<T>(key);
+                entry.LastAccessed = options.Clock.UtcNow;
+                return entries.AddOrUpdate(key, entry, (k, old) => entry);
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException();
+            }
         }
 
         public bool TrySet(object key, ICacheEntry<T> entry)
@@ -45,11 +53,10 @@ namespace TinyCache
             if (!key.Equals(entry.Key))
                 throw new ArgumentException("The key argument and key in the entity must match", nameof(key));
 
-            if (!entries.ContainsKey(key))
+            if (ScanForRemoveWithItemPriority() && !entries.ContainsKey(key))
                 return entries.TryAdd(key, entry);
             else
                 return false;
-
         }
         #endregion
 
@@ -134,6 +141,29 @@ namespace TinyCache
                 entry.Expired = true;
 
             ScanForExpiredItems(options.Clock.UtcNow);
+        }
+
+        protected bool ScanForRemoveWithItemPriority()
+        {
+            if(options.EntriesSizeLimit.HasValue)
+            {
+                if(entries.Count >= options.EntriesSizeLimit.Value)
+                {
+                    var tmpList = entries.Select(o => o.Value)
+                        .Where(o => o.Priority != CacheItemPriority.NeverRemove)
+                        .OrderBy(o => o.LastAccessed)
+                        .OrderBy(o => o.Priority)
+                        .ToList();
+                    int countToRemove = entries.Count - options.EntriesSizeLimit.Value + 1;
+                    for (int i = 0; i < tmpList.Count && i < countToRemove; i++)
+                        Remove(tmpList[i].Key);
+                }
+                return entries.Count < options.EntriesSizeLimit.Value;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         protected void ScanForExpiredItems(DateTimeOffset utcNow)

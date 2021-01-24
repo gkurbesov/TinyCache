@@ -22,7 +22,7 @@ namespace TinyCache
         /// <summary>
         /// Gets or sets the maximum size of the cache items.
         /// </summary>
-        public int? SizeLimit
+        public int? EntriesSizeLimit
         {
             get => sizeLimit;
             set
