@@ -37,7 +37,7 @@ namespace TinyCache
             }
             else
             {
-                throw new ArgumentOutOfRangeException();
+                throw new IndexOutOfRangeException();
             }
         }
 
