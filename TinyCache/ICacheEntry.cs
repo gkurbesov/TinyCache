@@ -31,7 +31,15 @@ namespace TinyCache
         /// Expired flag
         /// </summary>
         bool Expired { get; set; }
+        /// <summary>
+        /// Last access time
+        /// </summary>
         DateTimeOffset LastAccessed { get; set; }
+        /// <summary>
+        /// Expiration check
+        /// </summary>
+        /// <param name="now">current date and time</param>
+        /// <returns></returns>
         bool CheckExpired(in DateTimeOffset now);
     }
 }
