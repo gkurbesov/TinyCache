@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,34 +38,33 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<Task<T>> factory) where T : class
+        public static T FirstOrDefault<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
         {
-            if (cache.TryGetValue(key, out var value))
+            var collection = cache.GetCacheCollection();
+            foreach(var entry in collection)
             {
-                return value;
+                if(entry.Value != null)
+                {
+                    if (predicate(entry.Value))
+                        return entry.Value;
+                }
             }
-            else
-            {
-                var newEntryValue = await factory();
-                var entry = cache.CreateEntry(key);
-                entry.Value = newEntryValue;
-                return newEntryValue;
-            }
+            return default;
         }
 
-        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<ICacheEntry<T>, Task<T>> factory) where T : class
+        public static IEnumerable<T> FindAll<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
         {
-            if (cache.TryGetValue(key, out var value))
+            List<T> bag = new List<T>();
+            var collection = cache.GetCacheCollection();
+            foreach (var entry in collection)
             {
-                return value;
+                if (entry.Value != null)
+                {
+                    if (predicate(entry.Value))
+                        bag.Add(entry.Value);
+                }
             }
-            else
-            {
-                var entry = cache.CreateEntry(key);
-                var newEntryValue = await factory(entry);
-                entry.Value = newEntryValue;
-                return newEntryValue;
-            }
+            return bag;
         }
     }
 }
