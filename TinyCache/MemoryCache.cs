@@ -127,6 +127,12 @@ namespace TinyCache
             return false;
         }
 
+        public IEnumerable<ICacheEntry<T>> GetCacheCollection()
+        {
+            ScanForExpiredItems(options.Clock.UtcNow);
+            return entries.Values;
+        }
+
         #endregion
 
         #region Remove

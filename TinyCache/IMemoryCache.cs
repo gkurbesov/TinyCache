@@ -40,6 +40,11 @@ namespace TinyCache
         /// <returns></returns>
         bool TryGetEntry(object key, ICacheEntry<T> entry);
         /// <summary>
+        /// Returns a collection of cache entities
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<ICacheEntry<T>> GetCacheCollection();
+        /// <summary>
         /// Removes the object associated with the given key.
         /// </summary>
         /// <param name="key">key of cache entry</param>
