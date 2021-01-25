@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Threading;
 using Xunit;
 using TinyCache.Extensions;
@@ -50,13 +51,78 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public void RemoveTest()
+        public void TryGetEntryTest1()
+        {
+            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+
+            var entry = cache.CreateEntry(1);
+            var tmp = new object();
+            entry.Value = tmp;
+
+            var result = cache.TryGetEntry(1, out var value);
+
+            Assert.True(result);
+            Assert.NotNull(value);
+            Assert.Equal(entry, value);
+        }
+
+        [Fact]
+        public void TryGetEntryTest2()
         {
             IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
             cache.CreateEntry(1);
+            var result = cache.TryGetEntry(1, out var value);
+
+            Assert.True(result);
+            Assert.NotEqual(entry, value);
+        }
+
+        [Fact]
+        public void GetCollectionTest1()
+        {
+            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1);
+            cache.CreateEntry(2);
+            cache.CreateEntry(3);
+
+            var collection = cache.GetCacheCollection();
+            cache.Remove(1);
+
+            Assert.NotEmpty(collection);
+            Assert.Equal(3, collection.Count());
+            Assert.False(cache.ContainsKey(1));
+        }
+
+        [Fact]
+        public void GetCollectionTest2()
+        {
+            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
+
+            cache.CreateEntry(1).SetAbsoluteExpiration(TimeSpan.FromSeconds(1));
+            var beforeCollection = cache.GetCacheCollection();
+            Thread.Sleep(1500);
+
+            // HACK: deletion of entities happens in the background so the first result can be TRUE
+            if (cache.ContainsKey(1))
+                Thread.Sleep(500);
+
+            var afterCollection = cache.GetCacheCollection();
+
+            Assert.NotNull(beforeCollection.FirstOrDefault(o => o.Key.Equals(1)));
+            Assert.Null(afterCollection.FirstOrDefault(o => o.Key.Equals(1)));
+        }
+
+        [Fact]
+        public void RemoveTest()
+        {
+            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+
+            var entry = cache.CreateEntry(1);
+            entry.Value = new object();
             cache.Remove(1);
 
             var result = cache.TryGetValue(1, out var value);
@@ -70,12 +136,13 @@ namespace TinyCache.Tests
         {
             IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
 
-            var entry = cache.CreateEntry(1);
-            entry.Value = new object();
+            cache.CreateEntry(1)
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(1))
+                .SetValue(new object());
 
             Assert.True(cache.TryGetValue(1, out var tmp1));
             Thread.Sleep(1500);
-            Assert.True(cache.TryGetValue(1, out var tmp2));
+            Assert.False(cache.TryGetValue(1, out var tmp2));
         }
 
         [Fact]
@@ -105,15 +172,14 @@ namespace TinyCache.Tests
                     ExpirationScanFrequency = TimeSpan.FromSeconds(30)
                 });
 
-            var entry = cache.CreateEntry(1);
-            entry.Value = new object();
-            entry.SlidingExpiration = TimeSpan.FromSeconds(1);
+            var entry = cache.CreateEntry(1)
+                .SetSlidingExpiration(TimeSpan.FromSeconds(1))
+                .SetValue(new object());
 
             Assert.True(cache.TryGetValue(1, out var tmp1));
             Thread.Sleep(3500);
             Assert.False(cache.TryGetValue(1, out var tmp2));
         }
-
 
         [Fact]
         public void LimitTest1()
@@ -122,7 +188,6 @@ namespace TinyCache.Tests
                 new MemoryCacheOptions()
                 {
                     EntriesSizeLimit = 3,
-                    ExpirationScanFrequency = TimeSpan.FromSeconds(30)
                 });
 
             cache.CreateEntry(1).SetPriority(CacheItemPriority.NeverRemove);
@@ -138,7 +203,6 @@ namespace TinyCache.Tests
 
         }
 
-
         [Fact]
         public void LimitTest2()
         {
@@ -146,7 +210,6 @@ namespace TinyCache.Tests
                 new MemoryCacheOptions()
                 {
                     EntriesSizeLimit = 3,
-                    ExpirationScanFrequency = TimeSpan.FromSeconds(30)
                 });
 
             cache.CreateEntry(1).SetPriority(CacheItemPriority.NeverRemove);
@@ -155,6 +218,33 @@ namespace TinyCache.Tests
 
             Assert.Throws<IndexOutOfRangeException>(() => { cache.CreateEntry(4); });
             Assert.False(cache.TrySet(4, new CacheEntry<object>(4)));
+        }
+
+        [Fact]
+        public void FindTest1()
+        {
+            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue("John");
+            cache.CreateEntry(3).SetValue("Anna");
+
+            Assert.NotNull(cache.FirstOrDefault(o => o.Equals("Anna")));
+        }
+
+        [Fact]
+        public void FindTest2()
+        {
+            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue("John");
+            cache.CreateEntry(3).SetValue("Anna");
+
+            var collection = cache.FindAll(o => o.StartsWith("A"));
+
+            Assert.NotEmpty(collection);
+            Assert.Equal(2, collection.Count());
         }
     }
 }
