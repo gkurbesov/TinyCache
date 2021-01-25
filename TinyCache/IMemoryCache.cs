@@ -38,7 +38,7 @@ namespace TinyCache
         /// <param name="key">Key of cache entry</param>
         /// <param name="entry">entry of cache</param>
         /// <returns></returns>
-        bool TryGetEntry(object key, ICacheEntry<T> entry);
+        bool TryGetEntry(object key, out ICacheEntry<T> entry);
         /// <summary>
         /// Returns a collection of cache entities
         /// </summary>

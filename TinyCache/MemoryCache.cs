@@ -68,7 +68,17 @@ namespace TinyCache
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            return entries.ContainsKey(key);
+            var utcNow = options.Clock.UtcNow;
+
+            if (entries.TryGetValue(key, out var entry))
+            {
+                if (!entry.CheckExpired(utcNow))
+                    return true;
+                else
+                    Remove(key);
+            }
+            return false;
+
         }
 
         public bool TryGetValue(object key, out T value)
@@ -99,7 +109,7 @@ namespace TinyCache
             return false;
         }
 
-        public bool TryGetEntry(object key, ICacheEntry<T> entry)
+        public bool TryGetEntry(object key, out ICacheEntry<T> entry)
         {
             CheckDisposed();
             if (key == null)
@@ -109,7 +119,7 @@ namespace TinyCache
 
             if (entries.TryGetValue(key, out var cahceEntry))
             {
-                if (!entry.CheckExpired(utcNow))
+                if (!cahceEntry.CheckExpired(utcNow))
                 {
                     cahceEntry.LastAccessed = utcNow;
                     entry = cahceEntry;
