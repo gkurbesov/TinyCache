@@ -218,33 +218,6 @@ namespace TinyCache.Tests
 
             Assert.Throws<IndexOutOfRangeException>(() => { cache.CreateEntry(4); });
             Assert.False(cache.TrySet(4, new CacheEntry<object>(4)));
-        }
-
-        [Fact]
-        public void FindTest1()
-        {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-            cache.CreateEntry(3).SetValue("Anna");
-
-            Assert.NotNull(cache.FirstOrDefault(o => o.Equals("Anna")));
-        }
-
-        [Fact]
-        public void FindTest2()
-        {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-            cache.CreateEntry(3).SetValue("Anna");
-
-            var collection = cache.FindAll(o => o.StartsWith("A"));
-
-            Assert.NotEmpty(collection);
-            Assert.Equal(2, collection.Count());
-        }
+        }       
     }
 }
