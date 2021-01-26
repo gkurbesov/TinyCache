@@ -23,7 +23,7 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Func<ICacheEntry<T>, T> factory) where T : class
+        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Action<ICacheEntry<T>> factory) where T : class
         {
             if (cache.TryGetValue(key, out var value))
             {
@@ -32,9 +32,8 @@ namespace TinyCache.Extensions
             else
             {
                 var entry = cache.CreateEntry(key);
-                var newEntryValue = factory(entry);
-                entry.Value = newEntryValue;
-                return newEntryValue;
+                factory(entry);
+                return entry.Value;
             }
         }
 
