@@ -2,10 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>TinyKit.TinyCache.Extensions</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Gennady Kurbesov</Authors>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/gkurbesov/TinyCache/tree/master</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gkurbesov/TinyCache/tree/master</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TinyCache\TinyCache.csproj" />
+    <None Include="../LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TinyKit.TinyCache" Version="0.1.0" />
   </ItemGroup>
 
 </Project>

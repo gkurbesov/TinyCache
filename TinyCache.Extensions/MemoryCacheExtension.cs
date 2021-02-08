@@ -37,6 +37,35 @@ namespace TinyCache.Extensions
             }
         }
 
+        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<Task<T>> factory) where T : class
+        {
+            if (cache.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            else
+            {
+                var newEntryValue = await factory();
+                var entry = cache.CreateEntry(key);
+                entry.Value = newEntryValue;
+                return newEntryValue;
+            }
+        }
+
+        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<ICacheEntry<T>, Task> factory) where T : class
+        {
+            if (cache.TryGetValue(key, out var value))
+            {
+                return value;
+            }
+            else
+            {
+                var entry = cache.CreateEntry(key);
+                await factory(entry);
+                return entry.Value;
+            }
+        }
+
         public static T FirstOrDefault<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
         {
             var collection = cache.GetCacheCollection();
@@ -53,8 +82,8 @@ namespace TinyCache.Extensions
 
         public static IEnumerable<T> FindAll<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
         {
-            List<T> bag = new List<T>();
             var collection = cache.GetCacheCollection();
+            List<T> bag = new List<T>(collection.Count());
             foreach (var entry in collection)
             {
                 if (entry.Value != null)
