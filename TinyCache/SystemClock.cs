@@ -9,6 +9,21 @@ namespace TinyCache
     /// </summary>
     public class SystemClock : ISystemClock
     {
-        public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+        private int _lastTicks = 0;
+        private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
+
+        public DateTimeOffset UtcNow
+        {
+            get
+            {
+                int tickCount = Environment.TickCount;
+                if (tickCount != _lastTicks)
+                {
+                    _lastTime = DateTimeOffset.UtcNow;
+                    _lastTicks = tickCount;
+                }
+                return _lastTime;
+            }
+        }
     }
 }
