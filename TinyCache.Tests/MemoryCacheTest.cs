@@ -13,7 +13,7 @@ namespace TinyCache.Tests
         [Fact]
         public void CreateEntryTest()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
 
@@ -23,7 +23,7 @@ namespace TinyCache.Tests
         [Fact]
         public void TryGetValueTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             var tmp = new object();
@@ -39,7 +39,7 @@ namespace TinyCache.Tests
         [Fact]
         public void TryGetValueTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
@@ -53,7 +53,7 @@ namespace TinyCache.Tests
         [Fact]
         public void TryGetEntryTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             var tmp = new object();
@@ -69,7 +69,7 @@ namespace TinyCache.Tests
         [Fact]
         public void TryGetEntryTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
@@ -83,7 +83,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetCollectionTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1);
             cache.CreateEntry(2);
@@ -100,7 +100,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetCollectionTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
 
             cache.CreateEntry(1).SetAbsoluteExpiration(TimeSpan.FromSeconds(1));
             var beforeCollection = cache.GetCacheCollection();
@@ -119,7 +119,7 @@ namespace TinyCache.Tests
         [Fact]
         public void RemoveTest()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             var entry = cache.CreateEntry(1);
             entry.Value = new object();
@@ -134,7 +134,7 @@ namespace TinyCache.Tests
         [Fact]
         public void ExpiredTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
 
             cache.CreateEntry(1)
                 .SetAbsoluteExpiration(TimeSpan.FromSeconds(1))
@@ -148,7 +148,7 @@ namespace TinyCache.Tests
         [Fact]
         public void ExpiredTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(
+            IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
                 {
                     ExpirationScanFrequency = TimeSpan.FromSeconds(1)
@@ -166,7 +166,7 @@ namespace TinyCache.Tests
         [Fact]
         public void ExpiredTest3()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(
+            IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
                 {
                     ExpirationScanFrequency = TimeSpan.FromSeconds(30)
@@ -184,7 +184,7 @@ namespace TinyCache.Tests
         [Fact]
         public void LimitTest1()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(
+            IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
                 {
                     EntriesSizeLimit = 3,
@@ -199,14 +199,14 @@ namespace TinyCache.Tests
             Assert.True(cache.ContainsKey(1));
             Assert.True(cache.ContainsKey(3));
             Assert.True(cache.ContainsKey(4));
-            Assert.True(cache.TrySet(5, new CacheEntry<object>(5)));
+            Assert.True(cache.TrySet(5, new CacheEntry(5)));
 
         }
 
         [Fact]
         public void LimitTest2()
         {
-            IMemoryCache<object> cache = new MemoryCache<object>(
+            IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
                 {
                     EntriesSizeLimit = 3,
@@ -217,7 +217,7 @@ namespace TinyCache.Tests
             cache.CreateEntry(3).SetPriority(CacheItemPriority.NeverRemove);
 
             Assert.Throws<IndexOutOfRangeException>(() => { cache.CreateEntry(4); });
-            Assert.False(cache.TrySet(4, new CacheEntry<object>(4)));
+            Assert.False(cache.TrySet(4, new CacheEntry(4)));
         }       
     }
 }

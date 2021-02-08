@@ -13,7 +13,7 @@ namespace TinyCache.Tests
         [Fact]
         public void FindTest1()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -25,13 +25,13 @@ namespace TinyCache.Tests
         [Fact]
         public void FindTest2()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
             cache.CreateEntry(3).SetValue("Anna");
 
-            var collection = cache.FindAll(o => o.StartsWith("A"));
+            var collection = cache.FindAll(o => ((string)o).StartsWith("A"));
 
             Assert.NotEmpty(collection);
             Assert.Equal(2, collection.Count());
@@ -40,7 +40,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetOrCreateTest1()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -53,7 +53,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetOrCreateTest2()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -66,7 +66,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetOrCreateTest3()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -82,7 +82,7 @@ namespace TinyCache.Tests
         [Fact]
         public void GetOrCreateTest4()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -98,7 +98,7 @@ namespace TinyCache.Tests
         [Fact]
         public async Task GetOrCreateAsyncTest1()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -115,7 +115,7 @@ namespace TinyCache.Tests
         [Fact]
         public async Task GetOrCreateAsyncTest2()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");
@@ -132,7 +132,7 @@ namespace TinyCache.Tests
         [Fact]
         public async Task GetOrCreateAsyncTest3()
         {
-            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
             cache.CreateEntry(1).SetValue("Alexander");
             cache.CreateEntry(2).SetValue("John");

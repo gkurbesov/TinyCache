@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TinyKit.TinyCache" Version="0.1.0" />
+    <ProjectReference Include="..\TinyCache\TinyCache.csproj" />
   </ItemGroup>
 
 </Project>

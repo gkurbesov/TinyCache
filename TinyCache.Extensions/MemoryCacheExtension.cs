@@ -8,7 +8,7 @@ namespace TinyCache.Extensions
 {
     public static class MemoryCacheExtension
     {
-        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Func<T> factory) where T : class
+        public static object GetOrCreate(this IMemoryCache cache, object key, Func<object> factory)
         {
             if (cache.TryGetValue(key, out var value))
             {
@@ -23,7 +23,7 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static T GetOrCreate<T>(this IMemoryCache<T> cache, object key, Action<ICacheEntry<T>> factory) where T : class
+        public static object GetOrCreate(this IMemoryCache cache, object key, Action<ICacheEntry> factory)
         {
             if (cache.TryGetValue(key, out var value))
             {
@@ -37,7 +37,7 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<Task<T>> factory) where T : class
+        public static async Task<object> GetOrCreateAsync(this IMemoryCache cache, object key, Func<Task<object>> factory)
         {
             if (cache.TryGetValue(key, out var value))
             {
@@ -52,7 +52,7 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static async Task<T> GetOrCreateAsync<T>(this IMemoryCache<T> cache, object key, Func<ICacheEntry<T>, Task> factory) where T : class
+        public static async Task<object> GetOrCreateAsync(this IMemoryCache cache, object key, Func<ICacheEntry, Task> factory)
         {
             if (cache.TryGetValue(key, out var value))
             {
@@ -66,7 +66,7 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static T FirstOrDefault<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
+        public static object FirstOrDefault(this IMemoryCache cache, Func<object, bool> predicate)
         {
             var collection = cache.GetCacheCollection();
             foreach(var entry in collection)
@@ -80,10 +80,10 @@ namespace TinyCache.Extensions
             return default;
         }
 
-        public static IEnumerable<T> FindAll<T>(this IMemoryCache<T> cache, Func<T, bool> predicate) where T : class
+        public static IEnumerable<object> FindAll(this IMemoryCache cache, Func<object, bool> predicate)
         {
             var collection = cache.GetCacheCollection();
-            List<T> bag = new List<T>(collection.Count());
+            List<object> bag = new List<object>(collection.Count());
             foreach (var entry in collection)
             {
                 if (entry.Value != null)
