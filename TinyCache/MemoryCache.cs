@@ -2,15 +2,17 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TinyCache
 {
-    public class MemoryCache<T> : IMemoryCache<T>, IDisposable where T : class
+    public class MemoryCache : IMemoryCache, IDisposable
     {
         private readonly MemoryCacheOptions options;
-        private readonly ConcurrentDictionary<object, ICacheEntry<T>> entries;
+        private readonly ConcurrentDictionary<object, ICacheEntry> entries;
         private DateTimeOffset lastExpirationScan;
         private bool _disposed;
 
@@ -19,19 +21,19 @@ namespace TinyCache
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
             this.options = options;
-            this.entries = new ConcurrentDictionary<object, ICacheEntry<T>>();
+            this.entries = new ConcurrentDictionary<object, ICacheEntry>();
         }
 
         #region Create or set
-        public ICacheEntry<T> CreateEntry(object key)
+        public ICacheEntry CreateEntry(object key)
         {
             CheckDisposed();
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if(ScanForRemoveWithItemPriority())
+            if (ScanForRemoveWithItemPriority())
             {
-                var entry = new CacheEntry<T>(key);
+                var entry = new CacheEntry(key);
                 entry.LastAccessed = options.Clock.UtcNow;
                 return entries.AddOrUpdate(key, entry, (k, old) => entry);
             }
@@ -41,7 +43,7 @@ namespace TinyCache
             }
         }
 
-        public bool TrySet(object key, ICacheEntry<T> entry)
+        public bool TrySet(object key, ICacheEntry entry)
         {
             CheckDisposed();
             if (key == null)
@@ -81,7 +83,7 @@ namespace TinyCache
 
         }
 
-        public bool TryGetValue(object key, out T value)
+        public bool TryGetValue(object key, out object value)
         {
             CheckDisposed();
             if (key == null)
@@ -103,13 +105,13 @@ namespace TinyCache
                 }
             }
 
-            ScanForExpiredItems(utcNow);
+            StartScanForExpiredItemsIfNeeded(utcNow);
 
             value = null;
             return false;
         }
 
-        public bool TryGetEntry(object key, out ICacheEntry<T> entry)
+        public bool TryGetEntry(object key, out ICacheEntry entry)
         {
             CheckDisposed();
             if (key == null)
@@ -131,15 +133,15 @@ namespace TinyCache
                 }
             }
 
-            ScanForExpiredItems(utcNow);
+            StartScanForExpiredItemsIfNeeded(utcNow);
 
             entry = null;
             return false;
         }
 
-        public IEnumerable<ICacheEntry<T>> GetCacheCollection()
+        public IEnumerable<ICacheEntry> GetCacheCollection()
         {
-            ScanForExpiredItems(options.Clock.UtcNow);
+            StartScanForExpiredItemsIfNeeded(options.Clock.UtcNow);
             return entries.Values;
         }
 
@@ -153,17 +155,17 @@ namespace TinyCache
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (entries.TryRemove(key, out ICacheEntry<T> entry))
+            if (entries.TryRemove(key, out ICacheEntry entry))
                 entry.Expired = true;
 
-            ScanForExpiredItems(options.Clock.UtcNow);
+            StartScanForExpiredItemsIfNeeded(options.Clock.UtcNow);
         }
 
         protected bool ScanForRemoveWithItemPriority()
         {
-            if(options.EntriesSizeLimit.HasValue)
+            if (options.EntriesSizeLimit.HasValue)
             {
-                if(entries.Count >= options.EntriesSizeLimit.Value)
+                if (entries.Count >= options.EntriesSizeLimit.Value)
                 {
                     var tmpList = entries.Select(o => o.Value)
                         .Where(o => o.Priority != CacheItemPriority.NeverRemove)
@@ -182,19 +184,25 @@ namespace TinyCache
             }
         }
 
-        protected void ScanForExpiredItems(DateTimeOffset utcNow)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void StartScanForExpiredItemsIfNeeded(DateTimeOffset utcNow)
         {
             if (options.ExpirationScanFrequency < utcNow - lastExpirationScan)
             {
                 lastExpirationScan = utcNow;
-                _ = Task.Factory.StartNew(() =>
-                {
-                    foreach (var item in entries.ToArray())
-                    {
-                        if (item.Value.CheckExpired(utcNow))
-                            Remove(item.Key);
-                    }
-                });
+                Task.Factory.StartNew(state => ScanForExpiredItems((Tuple<MemoryCache, DateTimeOffset>)state), new Tuple<MemoryCache, DateTimeOffset>(this, utcNow),
+                   CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+            }
+        }
+
+        private static void ScanForExpiredItems(Tuple<MemoryCache, DateTimeOffset> value)
+        {
+            var cache = value.Item1;
+            var utcNow = value.Item2;
+            foreach (var item in value.Item1.entries.ToArray())
+            {
+                if (item.Value.CheckExpired(utcNow))
+                    cache.Remove(item.Key);
             }
         }
 

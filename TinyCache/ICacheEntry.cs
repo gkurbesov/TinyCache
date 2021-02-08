@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TinyCache
 {
-    public interface ICacheEntry<T> where T : class
+    public interface ICacheEntry
     {
         /// <summary>
         /// Key of cache item
@@ -26,7 +26,7 @@ namespace TinyCache
         /// <summary>
         /// Gets or sets the value for the cache entry.
         /// </summary>
-        T Value { get; set; }
+        object Value { get; set; }
         /// <summary>
         /// Expired flag
         /// </summary>

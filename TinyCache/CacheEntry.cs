@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TinyCache
 {
-    public class CacheEntry<T> : ICacheEntry<T> where T : class
+    public class CacheEntry : ICacheEntry
     {
         public CacheEntry(object key)
         {
@@ -30,13 +31,14 @@ namespace TinyCache
         /// <summary>
         /// The value for the cache entry.
         /// </summary>
-        public T Value { get; set; }
+        public object Value { get; set; }
         /// <summary>
         /// Expired flag
         /// </summary>
         public bool Expired { get; set; } = false;
         public DateTimeOffset LastAccessed { get; set; }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool CheckExpired(in DateTimeOffset now)
         {
             if (!Expired && !AbsoluteExpiration.HasValue && !SlidingExpiration.HasValue)
