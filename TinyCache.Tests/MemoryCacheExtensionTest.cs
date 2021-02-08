@@ -4,6 +4,7 @@ using System.Text;
 using Xunit;
 using TinyCache.Extensions;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace TinyCache.Tests
 {
@@ -88,6 +89,57 @@ namespace TinyCache.Tests
 
             var value = cache.GetOrCreate(3, entry =>
             {
+                entry.SetValue("Anna");
+            });
+
+            Assert.Equal("Anna", value);
+        }
+
+        [Fact]
+        public async Task GetOrCreateAsyncTest1()
+        {
+            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue("John");
+
+            var value = await cache.GetOrCreateAsync(1, async () =>
+            {
+                await Task.Delay(1000);
+                return "Anna";
+            });
+
+            Assert.Equal("Alexander", value);
+        }
+
+        [Fact]
+        public async Task GetOrCreateAsyncTest2()
+        {
+            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue("John");
+
+            var value = await cache.GetOrCreateAsync(3, async () =>
+            {
+                await Task.Delay(1000);
+                return "Anna";
+            });
+
+            Assert.Equal("Anna", value);
+        }
+
+        [Fact]
+        public async Task GetOrCreateAsyncTest3()
+        {
+            IMemoryCache<string> cache = new MemoryCache<string>(new MemoryCacheOptions());
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue("John");
+
+            var value = await cache.GetOrCreateAsync(3, async entry =>
+            {
+                await Task.Delay(1000);
                 entry.SetValue("Anna");
             });
 
