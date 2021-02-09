@@ -5,66 +5,29 @@ using Xunit;
 using TinyCache.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
+using TinyCache.Tests.Mock;
 
 namespace TinyCache.Tests
 {
     public class MemoryCacheExtensionTest
     {
         [Fact]
-        public void FindTest1()
-        {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-            cache.CreateEntry(3).SetValue("Anna");
-
-            Assert.NotNull(cache.FirstOrDefault(o => o.Equals("Anna")));
-        }
-
-        [Fact]
-        public void FindTest2()
-        {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-            cache.CreateEntry(3).SetValue("Anna");
-
-            var collection = cache.FindAll(o => ((string)o).StartsWith("A"));
-
-            Assert.NotEmpty(collection);
-            Assert.Equal(2, collection.Count());
-        }
-
-        [Fact]
         public void GetOrCreateTest1()
         {
             IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
-            cache.CreateEntry(1).SetValue("Alexander");
+            var obj = new object();
+
+            cache.CreateEntry(1).SetValue(obj);
             cache.CreateEntry(2).SetValue("John");
 
-            var value = cache.GetOrCreate(1, () => { return "Anna"; });
+            var value = cache.GetOrCreate(1, () => obj);
 
-            Assert.Equal("Alexander", value);
+            Assert.Equal(obj, value);
         }
 
         [Fact]
         public void GetOrCreateTest2()
-        {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-
-            var value = cache.GetOrCreate(3, () => { return "Anna"; });
-
-            Assert.Equal("Anna", value);
-        }
-
-        [Fact]
-        public void GetOrCreateTest3()
         {
             IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
@@ -80,7 +43,7 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public void GetOrCreateTest4()
+        public void GetOrCreateTest3()
         {
             IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
@@ -96,41 +59,7 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public async Task GetOrCreateAsyncTest1()
-        {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-
-            var value = await cache.GetOrCreateAsync(1, async () =>
-            {
-                await Task.Delay(1000);
-                return "Anna";
-            });
-
-            Assert.Equal("Alexander", value);
-        }
-
-        [Fact]
-        public async Task GetOrCreateAsyncTest2()
-        {
-            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-
-            cache.CreateEntry(1).SetValue("Alexander");
-            cache.CreateEntry(2).SetValue("John");
-
-            var value = await cache.GetOrCreateAsync(3, async () =>
-            {
-                await Task.Delay(1000);
-                return "Anna";
-            });
-
-            Assert.Equal("Anna", value);
-        }
-
-        [Fact]
-        public async Task GetOrCreateAsyncTest3()
+        public async Task GetOrCreateAsyncTest()
         {
             IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
 
@@ -139,11 +68,43 @@ namespace TinyCache.Tests
 
             var value = await cache.GetOrCreateAsync(3, async entry =>
             {
-                await Task.Delay(1000);
+                await Task.Delay(100);
                 entry.SetValue("Anna");
             });
 
             Assert.Equal("Anna", value);
         }
+
+        [Fact]
+        public void FirstOrDefaultTest()
+        {
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
+
+            var obj = new object();
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue(obj);
+            cache.CreateEntry(3).SetValue("Anna");
+
+            Assert.NotNull(cache.FirstOrDefault(o => o.Equals(obj)));
+        }
+
+        [Fact]
+        public void FindAllTest()
+        {
+            IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
+
+            var obj = new object();
+
+            cache.CreateEntry(1).SetValue("Alexander");
+            cache.CreateEntry(2).SetValue(obj);
+            cache.CreateEntry(3).SetValue(obj);
+
+            var collection = cache.FindAll(o => o.Equals(obj));
+
+            Assert.NotEmpty(collection);
+            Assert.Equal(2, collection.Count());
+        }
+
     }
 }

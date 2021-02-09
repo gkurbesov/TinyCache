@@ -37,21 +37,6 @@ namespace TinyCache.Extensions
             }
         }
 
-        public static async Task<object> GetOrCreateAsync(this IMemoryCache cache, object key, Func<Task<object>> factory)
-        {
-            if (cache.TryGetValue(key, out var value))
-            {
-                return value;
-            }
-            else
-            {
-                var newEntryValue = await factory();
-                var entry = cache.CreateEntry(key);
-                entry.Value = newEntryValue;
-                return newEntryValue;
-            }
-        }
-
         public static async Task<object> GetOrCreateAsync(this IMemoryCache cache, object key, Func<ICacheEntry, Task> factory)
         {
             if (cache.TryGetValue(key, out var value))
