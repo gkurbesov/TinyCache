@@ -16,6 +16,10 @@ namespace TinyCache
         private DateTimeOffset lastExpirationScan;
         private bool _disposed;
 
+        public MemoryCache()
+            : this(new MemoryCacheOptions()) { }
+
+
         public MemoryCache(MemoryCacheOptions options)
         {
             if (options == null)

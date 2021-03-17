@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/gkurbesov/TinyCache</PackageProjectUrl>
     <AssemblyVersion>0.2.0.0</AssemblyVersion>
     <FileVersion>0.0.0.0</FileVersion>
-    <PackageTags>Tiny, Cache, Caching</PackageTags>
+    <PackageTags>Tiny, Cache, Caching, Memory, Collections, memcache</PackageTags>
     <Version>0.2.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>TinyKit.TinyCache</PackageId>
