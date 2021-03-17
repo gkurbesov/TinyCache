@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using Xunit;
 using TinyCache.Extensions;
+using System.Threading.Tasks;
 
 namespace TinyCache.Tests
 {
@@ -132,21 +133,21 @@ namespace TinyCache.Tests
         }
 
         [Fact]
-        public void ExpiredTest1()
+        public async Task ExpiredTest1()
         {
             IMemoryCache cache = new MemoryCache(new MemoryCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(1) });
 
             cache.CreateEntry(1)
-                .SetAbsoluteExpiration(TimeSpan.FromSeconds(1))
+                .SetAbsoluteExpiration(TimeSpan.FromSeconds(2))
                 .SetValue(new object());
 
-            Assert.True(cache.TryGetValue(1, out var tmp1));
-            Thread.Sleep(1500);
+            await Task.Delay(3000);
+
             Assert.False(cache.TryGetValue(1, out var tmp2));
         }
 
         [Fact]
-        public void ExpiredTest2()
+        public async Task ExpiredTest2()
         {
             IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
@@ -158,13 +159,13 @@ namespace TinyCache.Tests
             entry.Value = new object();
             entry.AbsoluteExpiration = DateTimeOffset.UtcNow.AddSeconds(2);
 
-            Assert.True(cache.TryGetValue(1, out var tmp1));
-            Thread.Sleep(3500);
+            await Task.Delay(3000);
+
             Assert.False(cache.TryGetValue(1, out var tmp2));
         }
 
         [Fact]
-        public void ExpiredTest3()
+        public async Task ExpiredTest3()
         {
             IMemoryCache cache = new MemoryCache(
                 new MemoryCacheOptions()
@@ -176,8 +177,8 @@ namespace TinyCache.Tests
                 .SetSlidingExpiration(TimeSpan.FromSeconds(1))
                 .SetValue(new object());
 
-            Assert.True(cache.TryGetValue(1, out var tmp1));
-            Thread.Sleep(3500);
+            await Task.Delay(4000);
+
             Assert.False(cache.TryGetValue(1, out var tmp2));
         }
 
@@ -218,6 +219,6 @@ namespace TinyCache.Tests
 
             Assert.Throws<IndexOutOfRangeException>(() => { cache.CreateEntry(4); });
             Assert.False(cache.TrySet(4, new CacheEntry(4)));
-        }       
+        }
     }
 }
