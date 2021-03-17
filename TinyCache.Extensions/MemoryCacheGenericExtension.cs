@@ -68,12 +68,13 @@ namespace TinyCache.Extensions
 
         public static T FirstOrDefault<T>(this IMemoryCache cache, Func<T, bool> predicate)
         {
+            var dt = DateTimeOffset.UtcNow;
             var collection = cache.GetCacheCollection();
             foreach (var entry in collection)
             {
                 if (entry.Value is T value)
                 {
-                    if (predicate(value))
+                    if (predicate(value) && !entry.CheckExpired(dt))
                         return value;
                 }
             }
@@ -82,13 +83,14 @@ namespace TinyCache.Extensions
 
         public static IEnumerable<T> FindAll<T>(this IMemoryCache cache, Func<T, bool> predicate)
         {
+            var dt = DateTimeOffset.UtcNow;
             var collection = cache.GetCacheCollection();
             List<T> bag = new List<T>(collection.Count());
             foreach (var entry in collection)
             {
                 if (entry.Value is T value)
                 {
-                    if (predicate(value))
+                    if (predicate(value) && !entry.CheckExpired(dt))
                         bag.Add(value);
                 }
             }
